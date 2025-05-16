@@ -80,7 +80,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class IITC_Mobile extends AppCompatActivity
-        implements OnSharedPreferenceChangeListener, NfcAdapter.CreateNdefMessageCallback, OnLocaleChangedListener {
+        implements OnSharedPreferenceChangeListener, OnLocaleChangedListener {
     private static final String mIntelUrl = "https://intel.ingress.com/";
 
     private LocalizationActivityDelegate localizationDelegate = new LocalizationActivityDelegate(this);
@@ -307,7 +307,6 @@ public class IITC_Mobile extends AppCompatActivity
         registerReceiver(mBroadcastReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 
         final NfcAdapter nfc = NfcAdapter.getDefaultAdapter(this);
-        if (nfc != null) nfc.setNdefPushMessageCallback(this, this);
 
         this.firstTimeIntro();
 
@@ -1228,22 +1227,6 @@ public class IITC_Mobile extends AppCompatActivity
 
         }, 2000);
 
-    }
-
-    @Override
-    public NdefMessage createNdefMessage(final NfcEvent event) {
-        NdefRecord[] records;
-        if (mPermalink == null) { // no permalink yet, just provide AAR
-            records = new NdefRecord[] {
-                    NdefRecord.createApplicationRecord(getPackageName())
-            };
-        } else {
-            records = new NdefRecord[] {
-                    NdefRecord.createUri(mPermalink),
-                    NdefRecord.createApplicationRecord(getPackageName())
-            };
-        }
-        return new NdefMessage(records);
     }
 
     public void clipboardCopy(String msg) {

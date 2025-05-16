@@ -22,12 +22,12 @@ def metaFDroid(File apkDir, variant) {
 }
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion 35
 
     defaultConfig {
         applicationId "org.exarhteam.iitc_mobile"
-        minSdkVersion 17
-        targetSdkVersion 29
+        minSdkVersion 23
+        targetSdkVersion 35
         versionCode = getVersionCodeTimeStamps()
         versionName "0.40.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -81,10 +81,19 @@ android {
     lintOptions {
         abortOnError false
     }
-    compileOptions {
-        sourceCompatibility = '1.8'
-        targetCompatibility = '1.8'
+    // 20250514 fekerr ++
+    buildFeatures {
+        buildConfig = true
     }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+    // kotlinOptions {
+    //jvmTarget = '17'
+    // }
+    // fekerr --
+
     namespace 'org.exarhteam.iitc_mobile'
 
     applicationVariants.all { variant ->
@@ -117,3 +126,13 @@ task copyUserscripts(type: Copy) {
 }
 
 preBuild.dependsOn copyUserscripts
+
+tasks.withType(JavaCompile) { // Using .each also works, or .configureEach for newer Gradle
+    options.deprecation = true
+    // Forcing it via compilerArgs as well, just in case:
+    if (!options.compilerArgs.contains("-Xlint:deprecation")) {
+        options.compilerArgs.add("-Xlint:deprecation")
+    }
+    // You might also see/try:
+    // options.compilerArgs += "-Xlint:all" // This is very verbose, but includes deprecation
+}
