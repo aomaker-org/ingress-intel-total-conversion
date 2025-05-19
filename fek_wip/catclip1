@@ -1,0 +1,121 @@
+#!/usr/bin/env python3
+import os
+import sys
+import subprocess
+from pathlib import Path
+
+# Define a threshold for "small" files (e.g., in bytes).
+# 2KB = 2048 bytes. Files smaller than this will be printed to console.
+SMALL_FILE_THRESHOLD_BYTES = 2048
+
+def copy_to_clipboard(text_content):
+    """Copies the given text content to the system clipboard using clip.exe."""
+    try:
+        process = subprocess.Popen(
+            ["clip.exe"],
+            stdin=subprocess.PIPE,
+            text=True,
+            encoding='utf-8', # Ensure text is piped as UTF-8
+            errors='replace'  # Replace characters that can't be properly encoded
+        )
+        stdout, stderr = process.communicate(input=text_content) # Send content
+        if process.returncode == 0:
+            return True
+        else:
+            print(f"Error: clip.exe failed with code {process.returncode}. Stderr: {stderr}")
+            return False
+    except FileNotFoundError:
+        print("Error: clip.exe not found. Make sure it's accessible in your WSL PATH.")
+        return False
+    except Exception as e:
+        print(f"An error occurred while copying to clipboard: {e}")
+        return False
+
+def process_file(file_path: Path):
+    """Processes a single file: displays if small, prompts, and copies to clipboard."""
+    # This function now expects a Path object
+    print(f"\n--- Processing File: {file_path.name} (Full path: {file_path.resolve()}) ---")
+
+    try:
+        # Read content with replacement for problematic characters for both preview and copy
+        content = file_path.read_text(encoding='utf-8', errors='replace')
+        file_size_bytes = file_path.stat().st_size
+        is_small = file_size_bytes < SMALL_FILE_THRESHOLD_BYTES
+
+        if is_small:
+            print("Content (small file):")
+            print("--------------------------------------------------")
+            print(content.strip())
+            print("--------------------------------------------------")
+        else:
+            print(f"Content is large ({file_size_bytes} bytes). Preview not shown.")
+
+        while True:
+            try:
+                user_input = input(f"Copy content of '{file_path.name}' to clipboard? (y/N): ").strip().lower()
+                if user_input in ['y', 'yes']:
+                    if copy_to_clipboard(content):
+                        print(f"'{file_path.name}' content COPIED to clipboard. You can now paste it.")
+                    else:
+                        print(f"Failed to copy '{file_path.name}' to clipboard.")
+                    break
+                elif user_input in ['n', 'no', '']: # Default to No
+                    print(f"Skipped copying '{file_path.name}'.")
+                    break
+                else:
+                    print("Invalid input. Please enter 'y' or 'n'.")
+            except EOFError:
+                print(f"\nSkipped '{file_path.name}' due to EOF.")
+                break
+            except KeyboardInterrupt:
+                print(f"\nSkipped '{file_path.name}' due to user interrupt (Ctrl+C).")
+                return # Stop processing this file and potentially the script
+
+    except Exception as e:
+        print(f"Error processing file {file_path}: {e}")
+
+def process_path_argument(path_arg_str: str):
+    """
+    Determines if path_arg is a file or directory and processes accordingly.
+    For directories, it processes files directly within it (non-recursively).
+    """
+    path_arg = Path(path_arg_str)
+    if path_arg.is_file():
+        process_file(path_arg)
+    elif path_arg.is_dir():
+        print(f"\n=== Processing Directory: {path_arg.resolve()} ===")
+        found_files = False
+        # Iterate through items, sort for consistent order
+        for item in sorted(path_arg.iterdir()):
+            # Process only if it's a file and not a hidden file/directory (like .git)
+            if item.is_file() and not item.name.startswith('.'):
+                process_file(item)
+                found_files = True
+        if not found_files:
+            print(f"No processable files found directly in directory: {path_arg.name}")
+        print(f"=== Finished Processing Directory: {path_arg.resolve()} ===")
+    else:
+        print(f"Skipping: Argument '{path_arg_str}' is not a valid file or directory, or does not exist.")
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: python3 fek_wip/catclip.py <file_or_dir1> [file_or_dir2 ...]")
+        print("\nExamples:")
+        print("  python3 fek_wip/catclip.py README.md mobile/app/build.gradle")
+        print("  python3 fek_wip/catclip.py mobile/app")
+        print("  python3 fek_wip/catclip.py fek_wip/*.sh")
+        return
+
+    paths_to_process = sys.argv[1:]
+    print(f"Script 'catclip.py' started. Paths to process: {paths_to_process}")
+
+    for path_str_arg in paths_to_process:
+        process_path_argument(path_str_arg)
+        # Visual separator if multiple top-level arguments
+        if len(paths_to_process) > 1:
+            print("\n##################################################\n")
+
+    print("\nScript 'catclip.py' finished.")
+
+if __name__ == "__main__":
+    main()
