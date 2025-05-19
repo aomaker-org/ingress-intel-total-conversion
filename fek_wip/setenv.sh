@@ -41,8 +41,8 @@ export PATH="$FEK_WIP_DIR:$PATH"
 
 # --- Aliases ---
 # Define project-specific aliases here
-# The alias will execute the build_fork_002.sh script assumed to be in $FEK_WIP_DIR
-BUILD_SCRIPT_PATH="$FEK_WIP_DIR/build_fork_002.sh"
+# The alias will execute the build_fork.sh script assumed to be in $FEK_WIP_DIR
+BUILD_SCRIPT_PATH="$FEK_WIP_DIR/build_fork.sh"
 
 if [ -f "$BUILD_SCRIPT_PATH" ]; then
     if [ ! -x "$BUILD_SCRIPT_PATH" ]; then
