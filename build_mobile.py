@@ -54,7 +54,7 @@ def exec_gradle(source, dist_ext):
     else:
         raise UserWarning(f'Unknown value in gradle_distributiontypes: {dist_ext}')
 
-    status = os.system('{} {} -b {} {}'.format(gradlew, options, buildfile, build_action))
+    status = os.system('{} {} --debug -b {} {} -Pandroid.sdk.dir={}'.format(gradlew, options, buildfile, build_action, os.environ.get('ANDROID_HOME')))
     try:
         if not os.WIFEXITED(status):
             raise UserWarning('gradlew exited abnormally')
