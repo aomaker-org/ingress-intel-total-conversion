@@ -1,0 +1,10 @@
+# This is a placeholder for a prompt.
+# Prompts should be written in a clear and concise manner.
+# This file contains the raw prompt text to be used with an AI model.
+
+Analyze the following code and provide suggestions for improvement:
+
+```python
+def add(a, b):
+    return a + b
+```
