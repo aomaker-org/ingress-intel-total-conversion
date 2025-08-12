@@ -5,7 +5,7 @@ This file contains reasoning and progress notes from the AI developer, Jules.
 ## Session 1: Initial Project Setup
 
 - **Goal:** Create a dev template project structure.
-- **Branch:** `50821_dev_template`
+- **Branch:** `50811_dev_template`
 - **Steps:**
     1.  Create directory structure.
     2.  Create placeholder `README.md` files.
